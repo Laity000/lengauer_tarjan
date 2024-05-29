@@ -54,6 +54,7 @@ TEST(graph, cycle) {
   for (auto node : result) {
     std::cout << *node << std::endl;
   }
+  std::cout << "=============\n";
   auto first = std::begin(result);
   for (; first != std::end(result); ++first) {
     for (auto adjacency : getNodes(*first)) {

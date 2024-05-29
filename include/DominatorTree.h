@@ -32,6 +32,9 @@ auto buildDfsNumMap(const GraphNode<T>* root) {
 template <typename T>
 DominatorTree buildDominatorTree(const GraphNode<T>* root) {
   auto dfsnumMap = buildDfsNumMap(root);
+  for (auto it : dfsnumMap) {
+    std::cout << *it.first << " " << it.second << "\n";
+  }
 
   std::unordered_map<const GraphNode<T>*, const GraphNode<T>*> ancestorMap;
   std::unordered_map<const GraphNode<T>*, const GraphNode<T>*> semiMap;
@@ -61,7 +64,9 @@ DominatorTree buildDominatorTree(const GraphNode<T>* root) {
   auto ancestorWithLowestSemi =
       [&](const GraphNode<T>* v) -> const GraphNode<T>* {
     auto u = v;
-    while (ancestorMap[v]) {
+    std::cout << "-------raw prev: " << *v << "-------\n";
+    while (ancestorMap[v]) {  // These ancestors of v from predecessor of w are already added dynamic, v > w 
+      std::cout << "travel: " << *v << "-->" <<  *ancestorMap[v] << "\n";
       if (dfsnumMap[semiMap[v]] < dfsnumMap[semiMap[u]]) {
         u = v;
       }
@@ -78,6 +83,7 @@ DominatorTree buildDominatorTree(const GraphNode<T>* root) {
   for (auto it : dfsnumMap) {
     sortedByDfsnum[it.second] = it.first;
   }
+  // reverse sort dfs to travel tree node
   std::reverse(sortedByDfsnum.begin(), sortedByDfsnum.end());
 
   std::unordered_map<const GraphNode<T>*, std::vector<const GraphNode<T>*>>
@@ -93,6 +99,7 @@ DominatorTree buildDominatorTree(const GraphNode<T>* root) {
       if (dfsnumMap[v] <= dfsnumMap[n]) {
         tmp = v;
       } else {
+        std::cout << "\n***********eval: " << *n << "***********\n";
         tmp = semiMap[ancestorWithLowestSemi(v)];
       }
       if (!semi) {
@@ -107,10 +114,10 @@ DominatorTree buildDominatorTree(const GraphNode<T>* root) {
     bucket[semi].push_back(n);
     for (auto v : bucket[p]) {
       auto y = ancestorWithLowestSemi(v);
-      if (semiMap[v] == semiMap[y]) {
+      if (semiMap[v] == semiMap[y]) { // v
         idomMap[v] = p;
       } else {
-        sameDom[v] = y;
+        sameDom[v] = y;  // record y to compute idom(y) in the future，idom(v) = idom(y)
       }
     }
     bucket[p].clear();
